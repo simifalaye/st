@@ -5,7 +5,7 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "Liberation Mono:pixelsize=12:antialias=true:autohint=true";
+static char *font = "MesloLGS NF:pixelsize=15:antialias=true:autohint=true";
 static int borderpx = 2;
 
 /*
@@ -16,7 +16,7 @@ static int borderpx = 2;
  * 4: value of shell in /etc/passwd
  * 5: value of shell in config.h
  */
-static char *shell = "/bin/sh";
+static char *shell = "/bin/zsh";
 char *utmp = NULL;
 char *stty_args = "stty raw pass8 nl -echo -iexten -cstopb 38400";
 
@@ -32,7 +32,7 @@ static float chscale = 1.0;
  *
  * More advanced example: " `'\"()[]{}"
  */
-char *worddelimiters = " ";
+char *worddelimiters = " `'\"()[]{}";
 
 /* selection timeouts (in milliseconds) */
 static unsigned int doubleclicktimeout = 300;
@@ -82,42 +82,50 @@ char *termname = "st-256color";
  */
 unsigned int tabspaces = 8;
 
-/* Terminal colors (16 first used in escape sequence) */
+// Base16 Default Dark dark - simple terminal color setup
+// Chris Kempson (http://chriskempson.com)
 static const char *colorname[] = {
-	/* 8 normal colors */
-	"black",
-	"red3",
-	"green3",
-	"yellow3",
-	"blue2",
-	"magenta3",
-	"cyan3",
-	"gray90",
+    /* Normal colors */
+    "#181818", /*  0: Base 00 - Black   */
+    "#ab4642", /*  1: Base 08 - Red     */
+    "#a1b56c", /*  2: Base 0B - Green   */
+    "#f7ca88", /*  3: Base 0A - Yellow  */
+    "#7cafc2", /*  4: Base 0D - Blue    */
+    "#ba8baf", /*  5: Base 0E - Magenta */
+    "#86c1b9", /*  6: Base 0C - Cyan    */
+    "#d8d8d8", /*  7: Base 05 - White   */
 
-	/* 8 bright colors */
-	"gray50",
-	"red",
-	"green",
-	"yellow",
-	"#5c5cff",
-	"magenta",
-	"cyan",
-	"white",
+    /* Bright colors */
+    "#585858", /*  8: Base 03 - Bright Black */
+    "#ab4642", /*  9: Base 08 - Red          */
+    "#a1b56c", /* 10: Base 0B - Green        */
+    "#f7ca88", /* 11: Base 0A - Yellow       */
+    "#7cafc2", /* 12: Base 0D - Blue         */
+    "#ba8baf", /* 13: Base 0E - Magenta      */
+    "#86c1b9", /* 14: Base 0C - Cyan         */
+    "#f8f8f8", /* 15: Base 05 - Bright White */
 
-	[255] = 0,
+    /* A few more colors */
 
-	/* more colors can be added after 255 to use with DefaultXX */
-	"#cccccc",
-	"#555555",
+    "#dc9656", /* 16: Base 09 */
+    "#a16946", /* 17: Base 0F */
+    "#282828", /* 18: Base 01 */
+    "#383838", /* 19: Base 02 */
+    "#b8b8b8", /* 20: Base 04 */
+    "#e8e8e8", /* 21: Base 06 */
+
+    [255] = 0,
+
+    [256] = "#d8d8d8", /* default fg: Base 05 */
+    [257] = "#181818", /* default bg: Base 00 */
 };
-
 
 /*
  * Default colors (colorname index)
  * foreground, background, cursor, reverse cursor
  */
-unsigned int defaultfg = 7;
-unsigned int defaultbg = 0;
+unsigned int defaultfg = 256;
+unsigned int defaultbg = 257;
 static unsigned int defaultcs = 256;
 static unsigned int defaultrcs = 257;
 
@@ -156,8 +164,14 @@ static unsigned int defaultattr = 11;
  */
 static MouseShortcut mshortcuts[] = {
 	/* button               mask            string */
-	{ Button4,              XK_ANY_MOD,     "\031" },
-	{ Button5,              XK_ANY_MOD,     "\005" },
+	{ Button4,              XK_NO_MOD,      "\031" },
+	{ Button5,              XK_NO_MOD,      "\005" },
+};
+
+MouseKey mkeys[] = {
+	/* button               mask            function        argument */
+	{ Button4,              XK_NO_MOD,      kscrollup,      {.i =  1} },
+	{ Button5,              XK_NO_MOD,      kscrolldown,    {.i =  1} },
 };
 
 /* Internal keyboard shortcuts. */
@@ -176,8 +190,16 @@ static Shortcut shortcuts[] = {
 	{ TERMMOD,              XK_C,           clipcopy,       {.i =  0} },
 	{ TERMMOD,              XK_V,           clippaste,      {.i =  0} },
 	{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
+	{ ShiftMask,            XK_Page_Up,     kscrollup,      {.i = -1} },
+	{ ShiftMask,            XK_Page_Down,   kscrolldown,    {.i = -1} },
 	{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
 	{ TERMMOD,              XK_Num_Lock,    numlock,        {.i =  0} },
+    /* Begin user config */
+	{ TERMMOD,              XK_U,           kscrollup,      {.i = -1} },
+	{ TERMMOD,              XK_D,           kscrolldown,    {.i = -1} },
+	{ TERMMOD,              XK_K,           zoom,           {.f = +1} },
+	{ TERMMOD,              XK_J,           zoom,           {.f = -1} },
+	{ TERMMOD,              XK_H,           zoomreset,      {.f =  0} },
 };
 
 /*
